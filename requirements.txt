@@ -7,7 +7,7 @@ requests>=2.32,<3
 
 # Anthropic SDK. The notebook uses extended thinking (the `thinking=` parameter)
 # and the Claude Haiku 4.5 model, both of which require a recent SDK.
-anthropic>=0.40,<1
+anthropic>=0.50,<1
 
 # To run the notebook itself:
 jupyter>=1.0
