@@ -1,0 +1,58 @@
+
+╔══════════════════════════════════════════════════════════════════════╗
+║              VIJAY'S WORLD CUP AGENT — PIPELINE OVERVIEW            ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+  PRE-MATCH WINDOW (before kickoff)        HALFTIME WINDOW (kickoff+45 to +60)
+  ──────────────────────────────────        ─────────────────────────────────────
+
+  ┌─────────────────────────────┐           ┌────────────────────────────────┐
+  │  DATA FETCH (Sportmonks)    │           │  DATA FETCH (live)             │
+  │  ─────────────────────────  │           │  ────────────────────────────  │
+  │  • 17-bookmaker consensus   │           │  • Halftime score (e.g. 1-0)   │
+  │  • Sportmonks ML prediction │           │  • Updated Polymarket prices   │
+  │  • Expected Goals (xG)      │           │  • Updated bookmaker odds      │
+  │  • Recent form (last 5)     │           │  • First-half xG               │
+  │  • FIFA world rankings      │           └──────────────┬─────────────────┘
+  └──────────────┬──────────────┘                          │
+                 ▼                                          ▼
+  ┌─────────────────────────────┐           ┌────────────────────────────────┐
+  │  SPORTMONKS DIGEST (Claude) │           │  HALFTIME PREDICTION (Claude)  │
+  │  ─────────────────────────  │           │  ────────────────────────────  │
+  │  Summarises all signals     │           │  Primary anchor: HT score      │
+  │  into structured JSON       │           │  1-0 lead → ~72% win prob      │
+  └──────────────┬──────────────┘           │  2-0 lead → ~87% win prob      │
+                 ▼                          └──────────────┬─────────────────┘
+  ┌─────────────────────────────┐                          │
+  │  PREDICTION (Claude)        │                          ▼
+  │  ─────────────────────────  │           ┌────────────────────────────────┐
+  │  Signal hierarchy:          │           │  HALFTIME STRATEGY (Claude)    │
+  │  1. Bookmaker consensus ◄── │──────────►│  Edge = agent_prob - mkt_mid   │
+  │  2. Sportmonks ML           │           │  Bet if edge > 3%              │
+  │  3. xG                      │           │  Size: 8-15% of wallet         │
+  │  4. Recent form / FIFA rank │           │  Direction: always LONG        │
+  │  Output: win_prob for        │           └──────────────┬─────────────────┘
+  │  HOME, DRAW, AWAY           │                          │
+  └──────────────┬──────────────┘                          │
+                 ▼                                          ▼
+  ┌─────────────────────────────┐           ┌────────────────────────────────┐
+  │  STRATEGY (Claude)          │           │  ORDER → Polymarket (via Arena)│
+  │  ─────────────────────────  │           │  LONG on best-edge outcome     │
+  │  Compute edge vs Polymarket │           └────────────────────────────────┘
+  │  Bet if edge > 3%           │
+  │  Size: 8-12% of wallet      │           Both windows submit to:
+  │  Direction: always LONG     │           ┌────────────────────────────────┐
+  └──────────────┬──────────────┘           │  REASONING LEDGER              │
+                 ▼                          │  Every step recorded:          │
+  ┌─────────────────────────────┐           │  Observing → Thinking →        │
+  │  ORDER → Polymarket         │──────────►│  Thinking → Acting             │
+  │  LONG on best-edge outcome  │           │  Full audit trail for          │
+  └─────────────────────────────┘           │  Reasoning Score prize         │
+                                            └────────────────────────────────┘
+
+TECH STACK:
+  • Language   : Python 3
+  • LLM        : Claude Haiku 4.5 with extended thinking
+  • Data       : Stair AI Sportmonks proxy + Polymarket proxy
+  • Signals    : Bookmaker consensus (primary) > ML > xG > Form > Rankings
+  • Runs       : Twice per match — pre-match + halftime
